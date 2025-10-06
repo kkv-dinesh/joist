@@ -39,7 +39,7 @@ jobs:
       # 5. Push Docker image to ECR
       - name: Push Docker image to ECR
         run: |
-          IMAGE_NAME=my-app
+          IMAGE_NAME=flaskapp
           TAG=latest
           ECR_URI=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/$IMAGE_NAME
           echo "Pushing Docker image to ECR..."
