@@ -30,7 +30,7 @@ jobs:
       # 4. Build Docker image
       - name: Build Docker image
         run: |
-          IMAGE_NAME=my-app
+          IMAGE_NAME=flaskapp
           TAG=latest
           ECR_URI=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/$IMAGE_NAME
           echo "Building Docker image..."
