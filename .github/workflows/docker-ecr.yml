@@ -1,0 +1,53 @@
+name: Build and Push FlaskApp Docker Image to ECR
+
+on:
+  push:
+    branches:
+      - main # Trigger on main branch; change if needed
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2️⃣ Configure AWS credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1 # change region if needed
+
+      # 3️⃣ Login to ECR
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      # 4️⃣ Create ECR repository if it doesn't exist
+      - name: Create ECR repository if needed
+        run: |
+          IMAGE_NAME=flaskapp
+          aws ecr describe-repositories --repository-names $IMAGE_NAME || \
+          aws ecr create-repository --repository-name $IMAGE_NAME
+
+      # 5️⃣ Build Docker image
+      - name: Build Docker image
+        run: |
+          IMAGE_NAME=flaskapp
+          TAG=latest
+          ECR_URI="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/$IMAGE_NAME"
+          echo "Building Docker image: $ECR_URI:$TAG"
+          docker buildx build -t $ECR_URI:$TAG ./flaskapp
+
+      # 6️⃣ Push Docker image to ECR
+      - name: Push Docker image to ECR
+        run: |
+          IMAGE_NAME=flaskapp
+          TAG=latest
+          ECR_URI="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/$IMAGE_NAME"
+          echo "Pushing Docker image: $ECR_URI:$TAG"
+          docker push $ECR_URI:$TAG
